@@ -6,10 +6,8 @@ const session = require('express-session');
 const MongoDBStore = require('connect-mongodb-session')(session);
 const cors = require('cors');
 const { connectToDatabase, disconnectFromDatabase, User } = require('./db.js');
-const PORT = process.env.PORT || 3000;
-
 const {createUser, loginUser, logout, isLogged, edit} = require('./Auth.js');
-
+const PORT = process.env.PORT || 3000;
 connectToDatabase();
 
 

@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const validator = require('validator');
-const { connectToDatabase, disconnectFromDatabase, User } = require('./db.js');
+const {connectToDatabase, disconnectFromDatabase, User } = require('./db.js');
 
 
 const createUser = async (req, res) => {
