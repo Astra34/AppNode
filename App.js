@@ -38,7 +38,7 @@ app.use(session({
     maxAge: 86400000,
     httpOnly: true,
     secure: true,
-    domain: 'https://astra34.github.io/MyApp'
+    domain: 'https://astra34.github.io/MyApp/'
   }
 }));
 
