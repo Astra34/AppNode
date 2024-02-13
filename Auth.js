@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const validator = require('validator');
 const {connectToDatabase, disconnectFromDatabase, User } = require('./db.js');
 
@@ -25,10 +24,9 @@ const createUser = async (req, res) => {
         }else if(usernameExists){
             return res.status(409).json({ success: false , message:'This username is already used.'});
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             User: username,
-            Password: hashedPassword,
+            Password: password,
             Email: email            
         })
         await newUser.save();
@@ -47,7 +45,7 @@ const loginUser = async (req, res) => {
     try {
         const user = await User.findOne({ Email: email });
 
-        if (user && await bcrypt.compare(password, user.Password)) {
+        if (user && password === user.Password) {
             req.session.user = { id: user._id, email: user.Email, username: user.User };
             return res.status(200).json({ success: true, info: req.session.user });
         }
