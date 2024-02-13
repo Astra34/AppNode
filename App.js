@@ -37,7 +37,8 @@ app.use(session({
   cookie: {
     maxAge: 86400000,
     httpOnly: true,
-    secure: true
+    secure: true,
+    domain: process.env.ALLOW_URL
   }
 }));
 
