@@ -59,5 +59,6 @@ app.get('/api/users', async (req, res) => {
 });
 
 app.listen(PORT, () => {
+  print(process.env.ALLOW_URL)
   console.log(`Le serveur Express écoute sur le port ${PORT}`);
 });
