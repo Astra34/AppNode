@@ -48,15 +48,6 @@ app.post('/Api/CreateUser', createUser);
 app.post('/Api/Logout', logout);
 app.post('/Api/check-auth', isLogged);
 app.post('/Api/edit', edit);
-app.get('/api/users', async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (err) {
-    console.error('Erreur lors de la récupération des utilisateurs :', err);
-    res.status(500).json({ error: 'Erreur serveur lors de la récupération des utilisateurs' });
-  }
-});
 
 app.listen(PORT, () => {
   console.log(process.env.ALLOW_URL)
