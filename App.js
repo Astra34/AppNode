@@ -38,7 +38,6 @@ app.use(session({
     maxAge: 86400000,
     httpOnly: true,
     secure: true,
-    // domain: 'astra34.github.io',
     sameSite:'lax'
   }
 }));
