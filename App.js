@@ -38,7 +38,7 @@ app.use(session({
     maxAge: 86400000,
     httpOnly: true,
     secure: true,
-    // domain: process.env.ALLOW_URL,
+    domain: process.env.ALLOW_URL,
     sameSite: 'none'
   }
 }));
