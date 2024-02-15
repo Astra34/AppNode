@@ -39,6 +39,7 @@ app.use(session({
     httpOnly: true,
     secure: true,
     domain: 'astra34.github.io',
+    path: '/MyApp' ,
     sameSite: 'none'
   }
 }));
