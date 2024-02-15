@@ -47,7 +47,8 @@ const loginUser = async (req, res) => {
 
         if (user && password === user.Password) {
             req.session.user = { id: user._id, email: user.Email, username: user.User };
-            return res.status(200).json({ success: true, info: req.session.user });
+
+            return res.status(200).json({ success: true, info: req.session.user, sessionId: req.session.id});
         }
 
         return res.status(401).json({ success: false, message: 'Your login credentials are incorrect.' });
