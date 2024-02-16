@@ -26,6 +26,13 @@ app.post('/Api/Logout', logout);
 app.post('/Api/check-auth', isLogged);
 app.post('/Api/edit', edit);
 
+app.get('/test', (req, res) => {
+
+  res.json({
+    message: 'Route de test fonctionnelle'
+  });
+
+});
 
 app.listen(PORT, () => {
   console.log(process.env.ALLOW_URL)

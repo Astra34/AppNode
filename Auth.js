@@ -48,13 +48,8 @@ const loginUser = async (req, res) => {
         const user = await User.findOne({ Email: email });
 
         if (user && password === user.Password) {
-
-            const token = jwt.sign({userId: user.id}, process.env.SECRET, {
-                issuer: process.env.ALLOW_URL,
-                audience: process.env.HOST_URL,
-              });
-
-            return res.status(200).json({success: true, Token: token });
+            authToken = await user.CreateToken();
+            return res.status(200).json({success: true, Token: authToken });
         }
 
         return res.status(401).json({ success: false, message: 'Your login credentials are incorrect.' });
@@ -67,20 +62,20 @@ const loginUser = async (req, res) => {
 
 
 const isLogged = async (req, res) => {
-    const token = req.headers.authorization;
-    console.log(token)
-    jwt.verify(token, process.env.SECRET, {
-        audience: process.env.HOST_URL 
-    }, (err, decoded) => {
+    const authToken = req.header('Authorization').replace('Bearer ', '').trim();    
+    console.log(authToken)
+    
+    const decodedToken = jwt.verify('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWNiY2E2OGFmYzVlN2VhMGMxMDE4NTYiLCJpYXQiOjE3MDgxMDI1MDl9.KCzrGe5Mh4VkxBfEMq5SKW0BE0pSYbWvSPokeLhJI9Y','fo');
+    console.log(decodedToken)
+    const user = await User.findOne({ _id: decodedToken._id, 'AuthTokens.authToken': authToken})
+    console.log(user)
 
-        if(err) {
-            console.log(err)
-            return res.sendStatus(403); 
-        }
-
-        req.user = decoded;
-        return res.status(200).json({loggedIn: true, user: decoded});
-    });
+    if(!user){
+        return res.status(401).send('Not Authorization')
+    }
+    req.authToken = authToken
+    req.user = user;
+    return res.status(200).json({success: true, info: user});
 };
   
 const logout = async (req, res) => {

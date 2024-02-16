@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 
 async function connectToDatabase() {
@@ -23,10 +24,27 @@ async function disconnectFromDatabase() {
   }
 
 const userSchema = new mongoose.Schema({
-  User: String,
-  Password: String,
-  Email: String
+  User: {type: String, required: true, unique: true},
+
+  Password: {type: String, required: true},
+
+  Email: {type: String, required: true, unique: true, lowercase: true},
+
+  AuthTokens: [{
+    authToken : {
+      type: String,
+      required: true
+    }
+  }]
 });
+
+
+userSchema.methods.CreateToken = async function() {
+  const authToken = jwt.sign({ _id: this._id.toString()},'fo')
+  this.AuthTokens.push({ authToken });
+  await this.save();
+  return authToken
+}
 
 const User = mongoose.model('user', userSchema, 'users');
 
