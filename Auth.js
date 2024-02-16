@@ -1,5 +1,7 @@
 const validator = require('validator');
 const {connectToDatabase, disconnectFromDatabase, User } = require('./db.js');
+const jwt = require('jsonwebtoken');
+
 
 
 const createUser = async (req, res) => {
@@ -46,8 +48,13 @@ const loginUser = async (req, res) => {
         const user = await User.findOne({ Email: email });
 
         if (user && password === user.Password) {
-            req.session.user = { id: user._id, email: user.Email, username: user.User };
-            return res.status(200).json({ success: true, info: req.session.user });
+
+            const token = jwt.sign({userId: user.id}, process.env.SECRET, {
+                issuer: process.env.ALLOW_URL,
+                audience: process.env.HOST_URL,
+              });
+
+            return res.status(200).json({success: true, Token: token });
         }
 
         return res.status(401).json({ success: false, message: 'Your login credentials are incorrect.' });
@@ -60,34 +67,38 @@ const loginUser = async (req, res) => {
 
 
 const isLogged = async (req, res) => {
-    try {
-        if (req.session.user) {
-            return res.status(200).json({ success: true, info: req.session.user });  
+    const token = req.headers.authorization;
+
+    jwt.verify(token, secret, {
+        audience: 'http://api.example.com' 
+    }, (err, decoded) => {
+
+        if(err) {
+            return res.sendStatus(403); 
         }
 
-        return res.status(511).json({ success: false, message: 'Session does not exist' });
-
-    } catch (err) {
-      console.error("Erreur lors de l'exécution de la requête :", err);
-      return res.status(500).json({ success: false, message: 'Server error' });
-    }
-  };
+        req.user = decoded;
+        return res.status(200).json({loggedIn: true, user: decoded});
+    });
+};
   
 const logout = async (req, res) => {
-    try{
-        req.session.destroy(err => {
-            if (err) {
-                console.error("Erreur lors de la destruction de la session : ", err);
-                return res.status(500).json({ success: false, message: "Erreur lors de la déconnexion." });
-            }
-            return res.status(200).json({ success: true, message: "Déconnexion réussie." });
-        });
-
-    }catch(err){
-        console.log(err)
-        return res.status(500).json({ success: false, message: err});
+    try {
+      const token = req.headers.authorization;
+  
+      jwt.verify(token, secret, (err, decoded) => {
+        if(err) throw err;
+  
+        decoded.exp = Date.now(); 
+        const invalidToken = jwt.sign(decoded, secret);
+        return res.json(invalidToken);
+      });
+  
+    } catch(err) {
+      return res.status(500).json({message: 'Logout failed'});
     }
-}
+  
+  }
 
 const edit = async(req, res) => {
     return res.status(200).json({ success: true, message: "ok." });
