@@ -68,12 +68,13 @@ const loginUser = async (req, res) => {
 
 const isLogged = async (req, res) => {
     const token = req.headers.authorization;
-    console.log(token, req.headers.authorization)
+    console.log(token)
     jwt.verify(token, process.env.SECRET, {
         audience: process.env.HOST_URL 
     }, (err, decoded) => {
 
         if(err) {
+            console.log(err)
             return res.sendStatus(403); 
         }
 
