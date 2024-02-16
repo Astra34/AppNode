@@ -69,8 +69,8 @@ const loginUser = async (req, res) => {
 const isLogged = async (req, res) => {
     const token = req.headers.authorization;
 
-    jwt.verify(token, secret, {
-        audience: 'http://api.example.com' 
+    jwt.verify(token, process.env.SECRET, {
+        audience: process.env.HOST_URL 
     }, (err, decoded) => {
 
         if(err) {
@@ -86,11 +86,13 @@ const logout = async (req, res) => {
     try {
       const token = req.headers.authorization;
   
-      jwt.verify(token, secret, (err, decoded) => {
+      jwt.verify(token, process.env.SECRET, {
+        audience: process.env.HOST_URL 
+      },(err, decoded) => {
         if(err) throw err;
   
         decoded.exp = Date.now(); 
-        const invalidToken = jwt.sign(decoded, secret);
+        const invalidToken = jwt.sign(decoded, process.env.SECRET);
         return res.json(invalidToken);
       });
   
