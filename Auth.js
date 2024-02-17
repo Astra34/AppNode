@@ -62,17 +62,22 @@ const loginUser = async (req, res) => {
 
 
 const isLogged = async (req, res) => {
+    try {
+        const authToken = req.header('Authorization').replace('Bearer ', '').trim();        
+        const decodedToken = jwt.verify(authToken, process.env.SECRET);
+        const user = await User.findOne({ _id: decodedToken._id, 'AuthTokens.authToken': authToken})
+    
+        if(!user){
+            return res.status(401).send('Not Authorization')
+        }
+        req.authToken = authToken
+        req.user = user;
+        return res.status(200).json({success: true, info: user});
 
-    const authToken = req.header('Authorization').replace('Bearer ', '').trim();        
-    const decodedToken = jwt.verify(authToken, process.env.SECRET);
-    const user = await User.findOne({ _id: decodedToken._id, 'AuthTokens.authToken': authToken})
-
-    if(!user){
-        return res.status(401).send('Not Authorization')
+    } catch(err){
+        console.error('Erreur lors de la Authorization:', err);
+        return res.status(500).json({ success: false, message: 'La Authorization a échoué' });
     }
-    req.authToken = authToken
-    req.user = user;
-    return res.status(200).json({success: true, info: user});
 };
   
 const logout = async (req, res) => {
