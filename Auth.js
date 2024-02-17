@@ -80,13 +80,12 @@ const logout = async (req, res) => {
         const authToken = req.header('Authorization').replace('Bearer ', '').trim();        
         const decodedToken = jwt.verify(authToken, process.env.SECRET);
 
-        // Supprimer le token de la liste des tokens d'authentification de l'utilisateur
         const updateResult = await User.updateOne(
             { _id: decodedToken._id },
             { $pull: { AuthTokens: { authToken: authToken } } }
         );
 
-        if (updateResult.nModified > 0) {
+        if (updateResult) {
             return res.status(200).json({ success: true });
         } else {
             return res.status(404).json({ success: false, message: 'Token introuvable ou déjà expiré' });
