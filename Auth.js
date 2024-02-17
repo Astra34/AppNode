@@ -65,7 +65,7 @@ const isLogged = async (req, res) => {
     const authToken = req.header('Authorization').replace('Bearer ', '').trim();    
     console.log(authToken)
     
-    const decodedToken = jwt.verify('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWNiY2E2OGFmYzVlN2VhMGMxMDE4NTYiLCJpYXQiOjE3MDgxMDI1MDl9.KCzrGe5Mh4VkxBfEMq5SKW0BE0pSYbWvSPokeLhJI9Y','fo');
+    const decodedToken = jwt.verify(authToken, process.env.SECRET);
     console.log(decodedToken)
     const user = await User.findOne({ _id: decodedToken._id, 'AuthTokens.authToken': authToken})
     console.log(user)
