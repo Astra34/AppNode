@@ -62,41 +62,47 @@ const loginUser = async (req, res) => {
 
 
 const isLogged = async (req, res) => {
-    const authToken = req.header('Authorization').replace('Bearer ', '').trim();    
-    console.log(authToken)
+    try {
+        const authToken = req.header('Authorization').replace('Bearer ', '').trim();        
+        const decodedToken = jwt.verify(authToken, process.env.SECRET);
+        const user = await User.findOne({ _id: decodedToken._id, 'AuthTokens.authToken': authToken})
     
-    const decodedToken = jwt.verify('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NWNiY2E2OGFmYzVlN2VhMGMxMDE4NTYiLCJpYXQiOjE3MDgxMDI1MDl9.KCzrGe5Mh4VkxBfEMq5SKW0BE0pSYbWvSPokeLhJI9Y','fo');
-    console.log(decodedToken)
-    const user = await User.findOne({ _id: decodedToken._id, 'AuthTokens.authToken': authToken})
-    console.log(user)
+        if(!user){
+            return res.status(401).send('Not Authorization')
+        }
+        req.authToken = authToken
+        req.user = user;
+        return res.status(200).json({success: true, info: user});
 
-    if(!user){
-        return res.status(401).send('Not Authorization')
+    } catch(err){
+        console.error('Erreur lors de la Authorization:', err);
+        return res.status(500).json({ success: false, message: 'La Authorization a échoué' });
     }
-    req.authToken = authToken
-    req.user = user;
-    return res.status(200).json({success: true, info: user});
 };
   
 const logout = async (req, res) => {
     try {
-      const token = req.headers.authorization;
-  
-      jwt.verify(token, process.env.SECRET, {
-        audience: process.env.HOST_URL 
-      },(err, decoded) => {
-        if(err) throw err;
-  
-        decoded.exp = Date.now(); 
-        const invalidToken = jwt.sign(decoded, process.env.SECRET);
-        return res.json(invalidToken);
-      });
+        const authToken = req.header('Authorization').replace('Bearer ', '').trim();        
+        const decodedToken = jwt.verify(authToken, process.env.SECRET);
+
+        const updateResult = await User.updateOne(
+            { _id: decodedToken._id },
+            { $pull: { AuthTokens: { authToken: authToken } } }
+        );
+
+        if (updateResult) {
+            return res.status(200).json({ success: true });
+        } else {
+            return res.status(404).json({ success: false, message: 'Token introuvable ou déjà expiré' });
+        }
   
     } catch(err) {
-      return res.status(500).json({message: 'Logout failed'});
+        console.error('Erreur lors de la déconnexion :', err);
+        return res.status(500).json({ success: false, message: 'La déconnexion a échoué' });
     }
-  
-  }
+}
+
+
 
 const edit = async(req, res) => {
     return res.status(200).json({ success: true, message: "ok." });
